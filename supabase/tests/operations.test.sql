@@ -172,6 +172,11 @@ begin
   select c.claimed_at into claimed from public.claim_reminders(10) c where c.id=due_job;
   perform pg_temp.require(claimed is not null and not exists(select 1 from public.claim_reminders(10) c where c.id=due_job),
     'fila reserva cada envio uma vez');
+  update reminder_jobs set claimed_at=now()-interval '11 minutes' where id=due_job;
+  perform public.deliver_internal_reminder(due_job,claimed);
+  select c.claimed_at into claimed from public.claim_reminders(10) c where c.id=due_job;
+  perform pg_temp.require(claimed is not null and (select attempts=2 from reminder_jobs where id=due_job),
+    'lembrete interno interrompido retorna à fila');
   perform public.deliver_internal_reminder(due_job,claimed);
   perform public.deliver_internal_reminder(due_job,claimed);
   perform pg_temp.require((select count(*)=1 from notifications where entity_id=later_schedule and kind='upcoming'),

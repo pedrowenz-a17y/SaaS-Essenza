@@ -49,11 +49,11 @@ function MovementForm({ slug, product, replenish, close }: { slug: string; produ
   const suggested = Math.max(0.001, product.minimum - product.quantity + 1);
   return <ActionForm action={workspaceAction.bind(null, slug, "stock.move")} label="Registrar movimentação" onSaved={close}>
     <input type="hidden" name="id" value={product.id} />
-    <Field label="Tipo de movimentação">
+    {replenish ? <input type="hidden" name="kind" value="in" /> : <Field label="Tipo de movimentação">
       <Select name="kind" value={kind} onChange={event => setKind(event.target.value as MovementKind)}>
         {Object.entries(movements).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
       </Select>
-    </Field>
+    </Field>}
     <Field label={(kind === "adjustment" ? "Novo saldo" : "Quantidade") + " (" + product.unit + ")"}
       help={kind === "adjustment" ? "Informe o saldo contado na conferência." : undefined}>
       <Input name="quantity" inputMode="decimal" defaultValue={replenish ? String(Math.round(suggested * 1000) / 1000).replace(".", ",") : undefined} required />

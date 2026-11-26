@@ -96,7 +96,7 @@ export default async function Stock({ params, searchParams }: {
     const today = local().toISODate()!;
     const expiryLimit = local().plus({ days: 30 }).toISODate()!;
     content = <>
-      <form className="list-header filters">
+      <form className="list-header filters inventory-filters">
         <input type="hidden" name="aba" value={tab} />
         <label className="search-box"><Search size={16} /><Input name="q" aria-label="Nome do produto" placeholder="Buscar produto" defaultValue={search} /></label>
         <Select name="status" aria-label="Status do estoque" defaultValue={health ?? ""}><option value="">Todos os níveis de estoque</option>
@@ -105,7 +105,7 @@ export default async function Stock({ params, searchParams }: {
         <Button type="submit" variant="secondary">Filtrar</Button>
         {product.success && <Button asChild variant="ghost"><Link href={base}>Limpar produto</Link></Button>}
       </form>
-      {rows.length ? <Table label="Produtos no estoque">
+      {rows.length ? <Table label="Produtos no estoque" className="inventory-table">
         <thead><tr><th>Produto</th><th>Saldo</th><th>Validade</th><th>Previsão</th><th><span className="sr-only">Ações</span></th></tr></thead>
         <tbody>{rows.map(item => {
           const estimate = estimates.get(item.id);
@@ -136,7 +136,7 @@ export default async function Stock({ params, searchParams }: {
 
   return <div className="page-stack">
     <PageTitle title="Estoque" description="Produtos, consumo e reposição em um só lugar."><ProductEditor slug={empresa} initiallyOpen={query.novo === "1"} /></PageTitle>
-    <nav className="tabs" aria-label="Áreas do estoque">{tabs.map(item => <Link key={item.value} href={base + "?aba=" + item.value}
+    <nav className="tabs inventory-tabs" aria-label="Áreas do estoque">{tabs.map(item => <Link key={item.value} href={base + "?aba=" + item.value}
       className={tab === item.value ? "active" : ""} aria-current={tab === item.value ? "page" : undefined}>{item.title}</Link>)}</nav>
     <section className="panel">{content}</section>
     <Pagination page={page} size={size} total={count} path={base} filters={{

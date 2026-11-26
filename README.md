@@ -38,7 +38,7 @@ Somente variáveis com prefixo NEXT_PUBLIC_ podem ir ao navegador. Use ambientes
 
 ## Publicação na Vercel
 
-1. Crie um projeto vazio no Supabase. Na raiz do repositório, execute npx supabase login, npx supabase link --project-ref SEU_PROJECT_REF e npx supabase db push. As migrações criam as tabelas, as políticas RLS, os índices, as funções transacionais e os buckets.
+1. Crie ou selecione o projeto Supabase de destino. Na raiz do repositório, execute `npx supabase login`, `npx supabase link --project-ref SEU_PROJECT_REF` e confira o destino com `npx supabase migration list`. Revise as migrações pendentes com `npx supabase db push --dry-run` e aplique com `npx supabase db push`. As migrações criam e atualizam tabelas, políticas RLS, índices, funções transacionais e buckets.
 2. Importe o repositório na Vercel. Selecione **Next.js**, Node.js 22 ou posterior e a pasta que contém package.json como raiz. Configure as variáveis de produção no painel da Vercel. Defina APP_URL com o domínio HTTPS definitivo.
 3. Em *Authentication → URL Configuration* no Supabase, defina *Site URL* como APP_URL e permita APP_URL/auth/callback e suas variantes com parâmetros. Configure SMTP para e-mails de cadastro e recuperação. Esta configuração é independente dos e-mails de lembrete do Resend.
 4. Os modelos padrão de e-mail podem usar o fluxo PKCE com {{ .ConfirmationURL }}. Para permitir confirmação em outro navegador, use os links com token_hash abaixo nos respectivos modelos em *Authentication → Email Templates*.
@@ -51,8 +51,8 @@ Somente variáveis com prefixo NEXT_PUBLIC_ podem ir ao navegador. Use ambientes
    {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery
    ~~~
 
-5. Publique a aplicação. Valide cadastro, redefinição de senha, criação de empresa e o link público usando um endereço de homologação.
-6. No Vault do Supabase, cadastre essenza_app_url e essenza_cron_secret com os valores de APP_URL e CRON_SECRET. Execute supabase/cron/setup.sql no SQL Editor. Em *Cron*, confira a tarefa **essenza-lembretes**, agendada a cada cinco minutos. O histórico de envios fica em **Configurações → Histórico de envios**.
+5. Publique primeiro em homologação com o Supabase e o APP_URL desse ambiente. Valide cadastro, redefinição de senha, criação de empresa, solicitação pelo link público e baixa de um material ao concluir o atendimento. Configure separadamente as variáveis de Preview e Production na Vercel e mantenha a mesma BOOKING_SIGNING_SECRET entre implantações do mesmo ambiente para conservar os links já emitidos.
+6. No Vault do Supabase, cadastre essenza_app_url e essenza_cron_secret com os valores de APP_URL e CRON_SECRET. Execute supabase/cron/setup.sql no SQL Editor. Em *Cron*, confira a tarefa **essenza-lembretes**, agendada a cada cinco minutos. Em homologação, crie um atendimento com um lembrete interno perto do horário devido. Verifique a execução da tarefa, a resposta HTTP do pg_net e a entrega em **Configurações → Histórico de envios**. Use uma origem acessível ao Supabase para essa verificação.
 
 O endpoint do cron também aceita chamadas de outro serviço agendador. Envie POST para APP_URL/api/cron/lembretes com Authorization: Bearer CRON_SECRET. A fila usa bloqueio de linha para reservar cada tarefa. O processamento periódico continua com o navegador fechado.
 

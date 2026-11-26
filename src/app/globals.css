@@ -275,13 +275,13 @@ td small { display:block; color:var(--muted); font-size:.8125rem; }
 .public-stack { display:grid; gap:1rem; }
 .booking-layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(15rem,1fr); gap:1rem; align-items:start; }
 .booking-form { display:grid; gap:1.14rem; min-width:0; }
-.booking-step { display:grid; gap:.6rem; }
+.booking-step { display:grid; gap:.6rem; min-width:0; }
 .booking-step h2 { font-size:1.05rem; font-weight:820; }
 .choice { padding:.72rem .8rem; display:flex; align-items:center; gap:.6rem; cursor:pointer; border:1px solid var(--line-strong); border-radius:.7rem; }
 .choice:has(input:checked) { background:var(--rose-soft); border-color:var(--accent); }
 .choice input { accent-color:var(--rose); }
 .choice strong { font-weight:820; }
-.choice span:first-of-type { flex:1; min-width:0; }
+.choice span:first-of-type { flex:1; min-width:0; overflow-wrap:anywhere; }
 .choice small { display:block; color:var(--muted); }
 .slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(4.5rem,1fr)); gap:.45rem; }
 .slot { display:flex; min-height:2.5rem; align-items:center; justify-content:center; border:1px solid var(--line-strong); border-radius:.5rem; font-size:.9rem; font-weight:760; cursor:pointer; }
@@ -343,13 +343,26 @@ td small { display:block; color:var(--muted); font-size:.8125rem; }
   .topbar-date { display:none; }
   .hero { padding:1rem; min-height:10.5rem; background-position:58% center; }
   .hero::before { background:linear-gradient(90deg,#f3e5e7 3%,#f3e5e7ee 50%,#f3e5e738 100%); }
-  .split-even,.booking-layout { grid-template-columns:1fr; }
+  .split-even,.booking-layout { grid-template-columns:minmax(0,1fr); }
   .auth-page { grid-template-columns:1fr; }
   .auth-main { min-height:100dvh; }
   .auth-art { display:none; }
   .calendar .fc-header-toolbar { align-items:flex-start; flex-wrap:wrap; row-gap:.45rem; }
   .public-width { width:min(100% - 1.25rem,63rem); }
   .panel-pad { padding:.87rem; }
+  .booking-form .form-grid { grid-template-columns:1fr; }
+  .booking-form .slot { min-height:2.75rem; }
+  .booking-form .form-footer > .button { width:100%; }
+  .inventory-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .inventory-tabs a { min-height:2.75rem; align-items:center; }
+  .inventory-filters .search-box { flex-basis:100%; }
+  .inventory-filters .search-box .input { width:100%; }
+  .inventory-table table { min-width:max(100%,40rem); }
+  .inventory-table th:first-child,.inventory-table td:first-child {
+    position:sticky; left:0; z-index:1; background:var(--surface);
+    border-right:1px solid var(--line);
+  }
+  .inventory-table .cell-person strong { overflow-wrap:anywhere; }
 }
 @media (max-width:390px) {
   .kpi-top { gap:.32rem; }

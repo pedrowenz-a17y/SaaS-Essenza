@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import { db, supabaseConfig } from "@/lib/supabase/server";
 import type { Appointment, Company, Member, Role } from "@/lib/models";
 
@@ -25,6 +26,7 @@ export function result<T>(response: { data: unknown; error: { code?: string; mes
 }
 
 export const session = cache(async () => {
+  await connection();
   if (!supabaseConfig()) return null;
   const client = await db();
   const { data: { user } } = await client.auth.getUser();

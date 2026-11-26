@@ -34,7 +34,7 @@ export function integrationStatus() {
   const whatsapp = Boolean(global && env.WHATSAPP_ACCESS_TOKEN && /^\d+$/.test(env.WHATSAPP_PHONE_NUMBER_ID ?? "") &&
     /^v\d+\.\d+$/.test(env.WHATSAPP_GRAPH_VERSION ?? "") && env.WHATSAPP_REMINDER_TEMPLATE);
   return {
-    cron: Boolean(env.CRON_SECRET && env.SUPABASE_SERVICE_ROLE_KEY),
+    cron: Boolean(env.CRON_SECRET && env.CRON_SECRET.length >= 32 && env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY),
     email: Boolean(global && env.RESEND_API_KEY && env.RESEND_FROM),
     whatsapp,
     confirmationWhatsApp: Boolean(whatsapp && env.WHATSAPP_CONFIRMATION_TEMPLATE),

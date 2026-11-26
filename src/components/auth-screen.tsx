@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { APP_NAME } from "@/lib/branding";
 import { authAction } from "@/lib/server/auth-actions";
 import { supabaseConfig } from "@/lib/supabase/server";
@@ -13,7 +14,8 @@ const content = {
   reset: { title: "Escolha uma nova senha", description: "Use pelo menos 8 caracteres.", button: "Salvar nova senha" },
 };
 
-export function AuthScreen({ mode, invalidLink }: { mode: keyof typeof content; invalidLink?: boolean }) {
+export async function AuthScreen({ mode, invalidLink }: { mode: keyof typeof content; invalidLink?: boolean }) {
+  await connection();
   const page = content[mode];
   const connected = !!supabaseConfig();
   return <main className="auth-page">

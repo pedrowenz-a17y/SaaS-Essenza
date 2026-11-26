@@ -44,7 +44,11 @@ export async function POST(request: Request) {
       }));
       failures += batch.filter(item => item.status === "rejected").length;
     }
-    return NextResponse.json({ processados: jobs.length - failures, falhas: failures, alertas: !alertRun.error });
+    if (failures) console.error("Falha ao processar trabalhos de lembrete", { failures });
+    return NextResponse.json(
+      { processados: jobs.length - failures, falhas: failures, alertas: !alertRun.error },
+      { status: failures || alertRun.error ? 503 : 200 },
+    );
   } catch {
     return NextResponse.json({ erro: "A fila está temporariamente indisponível." }, { status: 500 });
   }

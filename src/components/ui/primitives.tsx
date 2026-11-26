@@ -50,6 +50,6 @@ export function SectionTitle({ icon: Icon, title, description, children }: { ico
 export function Empty({ icon: Icon, title, description, children }: { icon: LucideIcon; title: string; description?: string; children?: ReactNode }) {
   return <div className="empty"><span className="empty-icon"><Icon size={23} strokeWidth={1.6} /></span><h3>{title}</h3>{description && <p>{description}</p>}{children}</div>;
 }
-export function Table({ children, label }: { children: ReactNode; label: string }) {
-  return <div className="table-wrap"><table aria-label={label}>{children}</table></div>;
+export function Table({ children, label, className }: { children: ReactNode; label: string; className?: string }) {
+  return <div className={cn("table-wrap", className)}><table aria-label={label}>{children}</table></div>;
 }
