@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Bell, CalendarDays, CalendarPlus, ChartNoAxesColumn, CircleDollarSign, ClipboardList, Clock3, Globe,
+  ArrowUpRight, Bell, CalendarDays, CalendarPlus, ChartNoAxesColumn, CircleDollarSign, ClipboardList, Clock3, Globe,
   Package, Plus, Scissors, UserPlus, UsersRound, type LucideIcon,
 } from "lucide-react";
 import { AttendanceChart } from "@/components/charts";
@@ -39,19 +39,18 @@ export default async function Dashboard({ params, searchParams }: { params: Prom
   const stock = stockResponse ? result<{ products: Pick<Product, "id" | "name" | "quantity" | "unit"> | null }[]>(stockResponse) : [];
   const greeting = now.hour < 12 ? "Bom dia" : now.hour < 18 ? "Boa tarde" : "Boa noite";
   const firstName = ctx.member.name.split(/\s+/)[0];
-  const todayText = summary.today ? "Você tem " + summary.today + (summary.today === 1 ? " atendimento hoje." : " atendimentos hoje.") : "Nenhum atendimento marcado para hoje.";
   const shortcuts = [
-    { name: "Agenda", icon: CalendarPlus, url: base + "/agenda" + (ctx.scheduler ? "?novo=1" : "") },
+    { name: "Abrir agenda", icon: CalendarPlus, url: base + "/agenda" },
     { name: ctx.scheduler ? "Cadastrar cliente" : "Clientes", icon: UserPlus, url: base + "/clientes" + (ctx.scheduler ? "?novo=1" : "") },
     { name: "Serviços", icon: Scissors, url: base + "/servicos" },
     ...(ctx.company.booking_enabled ? [{ name: "Agendamento online", icon: Globe, url: "/agendar/" + empresa }] : []),
   ];
 
   return <div className="dashboard"><AutoRefresh />
-    <section className="hero">
-      <h1>{greeting}, {firstName}!</h1><p>{todayText}</p>
+    <header className="dashboard-heading">
+      <h1>{greeting}, {firstName}!</h1>
       <Button asChild><Link href={base + "/agenda" + (ctx.scheduler ? "?novo=1" : "")}>{ctx.scheduler ? <Plus size={17} /> : <CalendarDays size={17} />}{ctx.scheduler ? "Novo agendamento" : "Abrir agenda"}</Link></Button>
-    </section>
+    </header>
     <section className="kpi-grid" aria-label="Indicadores da empresa">
       <Metric name="Agendamentos de hoje" value={summary.today} caption={summary.confirmed + (summary.confirmed === 1 ? " confirmado" : " confirmados") + " · " + summary.pending + (summary.pending === 1 ? " pendente" : " pendentes")} icon={CalendarDays} href={base + "/agenda"} />
       <Metric name="Clientes cadastradas" value={summary.clients} caption="Ver cadastro de clientes" icon={UsersRound} color="lilac" href={base + "/clientes"} />
@@ -60,51 +59,51 @@ export default async function Dashboard({ params, searchParams }: { params: Prom
         <Metric name="Estoque baixo" value={summary.low} caption={summary.out + (summary.out === 1 ? " produto esgotado" : " produtos esgotados")} icon={Package} color="amber" href={base + "/estoque?aba=compras"} />
       </> : <Metric name="Próximos atendimentos" value={upcoming[0] ? hour(upcoming[0].starts_at) : "—"} caption={upcoming[0]?.title ?? "Agenda sem atendimentos"} icon={Clock3} color="green" href={base + "/agenda"} />}
     </section>
-    <div className="split-main">
-      <section className="panel panel-pad chart-panel">
-        <SectionTitle title="Atendimentos" icon={ChartNoAxesColumn}>
-          <div className="segmented" aria-label="Período do gráfico">
-            {[7,30].map(period => <Link key={period} href={base + "?periodo=" + period} scroll={false} className={period === days ? "active" : ""} aria-current={period === days ? "true" : undefined}>{period} dias</Link>)}
-          </div>
+    <div className="dashboard-main">
+      <section className="panel panel-pad dashboard-agenda">
+        <SectionTitle title="Próximos atendimentos" icon={Clock3}>
+          <Link className="dashboard-link" href={base + "/agenda"}>Ver agenda <ArrowUpRight size={15} aria-hidden="true" /></Link>
         </SectionTitle>
-        <AttendanceChart data={summary.series} />
-      </section>
-      <section className="panel panel-pad">
-        <SectionTitle title="Próximos atendimentos" icon={Clock3} />
         {upcoming.length ? <div className="data-list">{upcoming.map((appointment, index) => {
           const name = appointment.clients?.name ?? "Cliente removida";
           return <Link href={base + "/agenda?atendimento=" + appointment.id} key={appointment.id} className="data-row">
             <span className={"avatar " + ["", "avatar-lilac", "avatar-green", "avatar-amber"][index % 4]}>{initial(name)}</span>
-            <span className="row-detail"><strong>{name}</strong><small>{appointment.title}</small></span>
-            <span className="row-detail" style={{ flex: "none", textAlign: "right" }}><strong>{hour(appointment.starts_at)}</strong><small>{local(appointment.starts_at).hasSame(now, "day") ? "Hoje" : shortDate(appointment.starts_at)}</small></span>
+            <span className="row-detail"><strong>{name}</strong><small>{appointment.title}</small>
+              <span className="dashboard-appointment-status"><Badge tone={appointment.status}>{statuses[appointment.status]}</Badge></span>
+            </span>
+            <span className="row-detail dashboard-time"><strong>{hour(appointment.starts_at)}</strong><small>{local(appointment.starts_at).hasSame(now, "day") ? "Hoje" : shortDate(appointment.starts_at)}</small></span>
           </Link>;
-        })}</div> : <Empty icon={CalendarDays} title="Nenhum horário próximo" description="Os próximos agendamentos aparecem aqui." />}
-        {upcoming.length > 0 && <Link className="text-link subtle" href={base + "/agenda"}>Ver agenda</Link>}
+        })}</div> : <Empty icon={CalendarDays} title="Nenhum atendimento próximo" />}
+      </section>
+      <section className="panel panel-pad chart-panel">
+        <SectionTitle title="Atendimentos" icon={ChartNoAxesColumn}>
+          <nav className="segmented" aria-label="Período do gráfico">
+            {[7,30].map(period => <Link key={period} href={base + "?periodo=" + period} scroll={false} className={period === days ? "active" : ""} aria-current={period === days ? "true" : undefined}>{period} dias</Link>)}
+          </nav>
+        </SectionTitle>
+        <AttendanceChart data={summary.series} />
       </section>
     </div>
-    <div className="split-main">
-      <div className="split-even">
-        <section className="panel panel-pad">
-          <SectionTitle title="Estoque e reposição" icon={Package} />
-          {ctx.manager ? (stock.some(row => row.products) ? <div className="data-list">{stock.map(({ products: item }) => item && <div className="data-row" key={item.id}>
-            <span className={"row-icon " + (item.quantity <= 0 ? "red" : "amber")}><Package size={16} /></span>
-            <span className="row-detail"><strong>{item.name}</strong><small>{quantity(item.quantity)} {item.unit}</small></span>
-            <Badge tone={item.quantity <= 0 ? "red" : "amber"}>{item.quantity <= 0 ? "Esgotado" : "Baixo"}</Badge>
-          </div>)}</div> : <Empty icon={Package} title="Sem reposições pendentes" />) : <Empty icon={ClipboardList} title="Controle de materiais" description="Ajuste o consumo dos materiais ao concluir um atendimento." />}
-          {ctx.manager && <Link href={base + "/estoque?aba=compras"} className="text-link subtle">Lista de compras</Link>}
-        </section>
-        <section className="panel panel-pad">
-          <SectionTitle title="Notificações" icon={Bell} />
-          {notifications.length ? <div className="data-list">{notifications.map(notification => <div key={notification.id} className="data-row">
-            <div className="row-detail"><strong>{notification.message}</strong><small>{shortDate(notification.created_at)} · {hour(notification.created_at)}</small></div>
-          </div>)}</div> : <Empty icon={Bell} title="Tudo em dia" />}
-          <Link href={base + "/notificacoes"} className="text-link subtle">Ver todas</Link>
-        </section>
-      </div>
+    <div className="dashboard-support">
+      <section className="panel panel-pad">
+        <SectionTitle title="Estoque e reposição" icon={Package} />
+        {ctx.manager ? (stock.some(row => row.products) ? <div className="data-list">{stock.map(({ products: item }) => item && <div className="data-row" key={item.id}>
+          <span className={"row-icon " + (item.quantity <= 0 ? "red" : "amber")}><Package size={16} /></span>
+          <span className="row-detail"><strong>{item.name}</strong><small>{quantity(item.quantity)} {item.unit}</small></span>
+          <Badge tone={item.quantity <= 0 ? "red" : "amber"}>{item.quantity <= 0 ? "Esgotado" : "Baixo"}</Badge>
+        </div>)}</div> : <Empty icon={Package} title="Sem reposições pendentes" />) : <Empty icon={ClipboardList} title="Controle de materiais" description="Ajuste o consumo dos materiais ao concluir um atendimento." />}
+        {ctx.manager && <Link href={base + "/estoque?aba=compras"} className="text-link subtle">Lista de compras</Link>}
+      </section>
+      <section className="panel panel-pad">
+        <SectionTitle title="Notificações" icon={Bell} />
+        {notifications.length ? <div className="data-list">{notifications.map(notification => <div key={notification.id} className="data-row">
+          <div className="row-detail"><strong>{notification.message}</strong><small>{shortDate(notification.created_at)} · {hour(notification.created_at)}</small></div>
+        </div>)}</div> : <Empty icon={Bell} title="Tudo em dia" />}
+        <Link href={base + "/notificacoes"} className="text-link subtle">Ver todas</Link>
+      </section>
       <section className="panel panel-pad">
         <SectionTitle title="Acesso rápido" icon={ClipboardList} />
         <div className="shortcut-grid">{shortcuts.map(shortcut => <Link href={shortcut.url} className="shortcut" key={shortcut.name}><shortcut.icon size={16} />{shortcut.name}</Link>)}</div>
-        {upcoming[0] && <div className="data-row"><span className="row-detail"><strong>Próximo horário</strong><small>{upcoming[0].title} · {hour(upcoming[0].starts_at)}</small></span><Badge tone={upcoming[0].status}>{statuses[upcoming[0].status]}</Badge></div>}
       </section>
     </div>
   </div>;
